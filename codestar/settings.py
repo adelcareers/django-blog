@@ -29,6 +29,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     '.herokuapp.com',
+    'localhost',
+    '127.0.0.1',
 ]
 
 
@@ -81,9 +83,26 @@ import dj_database_url
 if os.path.isfile('env.py'):
     import env
 
-DATABASES = {
-    'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
-}
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    try:
+        import psycopg2  # noqa: F401
+        DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
+    except Exception:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 
